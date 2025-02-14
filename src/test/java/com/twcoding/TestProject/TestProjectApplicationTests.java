@@ -1,4 +1,4 @@
-package com.tecoding.TestProject;
+package com.twcoding.TestProject;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
