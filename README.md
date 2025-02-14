@@ -11,3 +11,10 @@
 登入成功後會有提示字元1>
 輸入GO執行sql
 ```
+# 單元測試
+### BatchConfigTests.syncDailyForeignExchangeRates
+- 測試功能1:從指定的url獲取資料並寫入DB
+### ApiControllerTests.forexAPI1
+- 測試功能2:正常查詢的狀況
+### ApiControllerTests.forexAPI2
+- 測試功能2:參數有誤的狀況
