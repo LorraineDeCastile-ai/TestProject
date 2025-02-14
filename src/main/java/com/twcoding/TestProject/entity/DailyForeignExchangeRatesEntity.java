@@ -14,6 +14,10 @@ import javax.persistence.Table;
 public class DailyForeignExchangeRatesEntity implements Serializable {
 
 	private static final long serialVersionUID = 609455766381496820L;
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long ID;
 
 	@Column(name = "DATE")
 	private String date; //日期
@@ -26,10 +30,14 @@ public class DailyForeignExchangeRatesEntity implements Serializable {
 	
 	@Column(name = "EXCHANGE_RATE")
 	private Double exchangeRate; //匯率
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long ID;
+
+	public Long getID() {
+		return ID;
+	}
+
+	public void setID(Long iD) {
+		ID = iD;
+	}
 	
 	public String getDate() {
 		return date;
@@ -61,14 +69,6 @@ public class DailyForeignExchangeRatesEntity implements Serializable {
 
 	public void setExchangeRate(Double exchangeRate) {
 		this.exchangeRate = exchangeRate;
-	}
-
-	public Long getID() {
-		return ID;
-	}
-
-	public void setID(Long iD) {
-		ID = iD;
 	}
 	
 }

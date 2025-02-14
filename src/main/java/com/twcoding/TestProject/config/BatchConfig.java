@@ -51,6 +51,7 @@ public class BatchConfig {
 					entity.setCurrencyType(key.split("/")[0]);
 					entity.setExchangeCurrencyType(key.split("/")[1]);
 					entity.setExchangeRate(Double.valueOf(map.get(key)));
+					entity.setID(null);
 					saveIfNotExists(entity);
 				}
 			});
@@ -58,8 +59,7 @@ public class BatchConfig {
 	}
 	
 	private void saveIfNotExists(DailyForeignExchangeRatesEntity entity){
-		List<DailyForeignExchangeRatesEntity> existsList = dailyForeignExchangeRatesRepository.findByDateAndCurrencyTypeAndExchangeCurrencyType(entity.getDate(), entity.getCurrencyType(), entity.getExchangeCurrencyType());
-		if(existsList.size() == 0)
-		dailyForeignExchangeRatesRepository.saveAndFlush(entity);
+		if(dailyForeignExchangeRatesRepository.findByDateAndCurrencyTypeAndExchangeCurrencyType(entity.getDate(), entity.getCurrencyType(), entity.getExchangeCurrencyType()).size() == 0)
+			dailyForeignExchangeRatesRepository.saveAndFlush(entity);
 	}
 }
