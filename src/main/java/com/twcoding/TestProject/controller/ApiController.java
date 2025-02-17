@@ -44,7 +44,7 @@ public class ApiController {
 		result.put("currency", list.stream().map(entity->{
 			Map<String, String> map = new HashMap<>();
 			map.put("date", entity.getDate());
-			map.put("usd", entity.getExchangeRate().toString());
+			map.put(currency.toLowerCase(), entity.getExchangeRate().toString());
 			return map;
 		}).collect(Collectors.toList()));
 		
