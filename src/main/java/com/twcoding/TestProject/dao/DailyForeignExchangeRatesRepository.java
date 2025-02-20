@@ -11,6 +11,9 @@ import com.twcoding.TestProject.entity.DailyForeignExchangeRatesEntity;
 
 @Repository
 public interface DailyForeignExchangeRatesRepository extends JpaRepository<DailyForeignExchangeRatesEntity, Long> {
+	
+	List<DailyForeignExchangeRatesEntity> findAll();
+	
 	List<DailyForeignExchangeRatesEntity> findByDateAndCurrencyTypeAndExchangeCurrencyType(String date, String currencyType, String exchangeCurrencyType);
 	
 	@Query("SELECT dfer FROM DailyForeignExchangeRatesEntity dfer WHERE dfer.date >= :startDate and dfer.date <= :endDate and dfer.currencyType = :currencyType and dfer.exchangeCurrencyType = 'NTD' ")

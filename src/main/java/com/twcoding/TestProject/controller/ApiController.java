@@ -1,56 +1,67 @@
 package com.twcoding.TestProject.controller;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
-import com.twcoding.TestProject.dao.DailyForeignExchangeRatesRepository;
-import com.twcoding.TestProject.entity.DailyForeignExchangeRatesEntity;
+import com.twcoding.TestProject.bean.Result;
+import com.twcoding.TestProject.bean.ResultCode;
+import com.twcoding.TestProject.service.DailyForeignExchangeRatesService;
 
 
 @RestController
 public class ApiController {
-
-	@Autowired
-	private DailyForeignExchangeRatesRepository dailyForeignExchangeRatesRepository;
 	
-	@PostMapping("/")
-	public String forexAPI(@RequestHeader(value="startDate", required=true) String startDate, @RequestHeader(value="endDate", required=true) String endDate, @RequestHeader(value="currency", required=true) String currency){
-		Map<String, Object> result = new LinkedHashMap<>();
-		Map<String, String> error = new LinkedHashMap<>();
-		result.put("error", error);
-		error.put("code", "E001");
-		error.put("message", "日期區間不符");
-		//測試日期
-		if(!checkStartDate(startDate) || !checkEndDate(endDate))
-			return new Gson().toJson(result);
-
-		error.put("code", "0000");
-		error.put("message", "成功");
-		startDate = startDate.replaceAll("[-/]+", "");
-		endDate = endDate.replaceAll("[-/]+", "");
+	@Autowired
+	private DailyForeignExchangeRatesService deForeignExchangeRatesService;
+	
+	private static final SimpleDateFormat INPUT_DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
+	private static final SimpleDateFormat QUERY_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+	
+	class DailyForeignExchangeRatesResult extends Result{
+		private static final long serialVersionUID = -1867174874173555133L;
 		
-		List<DailyForeignExchangeRatesEntity> list = dailyForeignExchangeRatesRepository.findByDateAndCurrencyType(startDate, endDate, currency);
-		result.put("currency", list.stream().map(entity->{
-			Map<String, String> map = new HashMap<>();
-			map.put("date", entity.getDate());
-			map.put(currency.toLowerCase(), entity.getExchangeRate().toString());
-			return map;
-		}).collect(Collectors.toList()));
+		List<Map<String, String>> currency;
+
+		public List<Map<String, String>> getCurrency() {
+			return currency;
+		}
+
+		public void setCurrency(List<Map<String, String>> currency) {
+			this.currency = currency;
+		}
+		
+	}
+	
+	@PostMapping("/forex")
+	public String forexAPI(@RequestBody(required=true) String startDate, @RequestBody(required=true) String endDate, @RequestBody(required=true) String currency){
+		DailyForeignExchangeRatesResult result = new DailyForeignExchangeRatesResult();
+		result.setError(new ResultCode());
+		
+		//測試日期
+		if(!checkStartDate(startDate) || !checkEndDate(endDate)) {
+			result.getError().setCode("E001");
+			result.getError().setMessage("日期區間不符");
+			return new Gson().toJson(result);
+		}else {
+			result.getError().setCode("0000");
+			result.getError().setMessage("成功");
+		}
+
+		startDate = QUERY_DATE_FORMAT.format(checkDate(startDate));
+		endDate = QUERY_DATE_FORMAT.format(checkDate(endDate));
+		
+		result.setCurrency(deForeignExchangeRatesService.findByDateAndCurrencyType(startDate, endDate, currency));
 		
 		return new Gson().toJson(result);
 	}
-
 	/**
 	 * 檢查日期格式
 	 * 檢查開始日期最早為去年
@@ -94,23 +105,11 @@ public class ApiController {
 	 * @return 無問題則返回Date
 	 */
 	private Date checkDate(String date){
-		if(date.split("/").length != 3)
-			return null;
-		Date inputDate;
-		try{
-			int year = Integer.valueOf(date.split("/")[0]);
-			int month = Integer.valueOf(date.split("/")[1]);
-			int day = Integer.valueOf(date.split("/")[2]);
-			if(month < 1 || month > 12)
-				return null;
-			if(day < 1 || day > 31)
-				return null;
-			Calendar calendar = Calendar.getInstance();
-			calendar.set(year, month - 1, day);//月份從0~11
-			inputDate = calendar.getTime();
+		try {
+			return INPUT_DATE_FORMAT.parse(date);
 		}catch (Exception e) {
 			return null;
 		}
-		return inputDate;
 	}
+
 }

@@ -1,27 +1,29 @@
-package com.twcoding.TestProject.config;
+package com.twcoding.TestProject.batch;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.twcoding.TestProject.dao.DailyForeignExchangeRatesRepository;
 import com.twcoding.TestProject.entity.DailyForeignExchangeRatesEntity;
 
-@Service
-public class BatchConfig {
+@Configuration
+@EnableScheduling
+public class DailyForeignExchangeRatesBatch {
 	
 	@Autowired
 	private DailyForeignExchangeRatesRepository dailyForeignExchangeRatesRepository;
-	
-	@Scheduled(cron = "0 0 17 * * ?")
+
+	@Scheduled(cron = "0 0 18 * * ?")
 	public void syncDailyForeignExchangeRates(){
 		List<Map<String, String>> data = sendHttpRequest();
 		updateDailyForeignExchangeRatesByData(data);
@@ -42,6 +44,7 @@ public class BatchConfig {
 	}
 	
 	private void updateDailyForeignExchangeRatesByData(List<Map<String, String>> data){
+		List<DailyForeignExchangeRatesEntity> dataList = dailyForeignExchangeRatesRepository.findAll();
 		data.forEach(map->{
 			DailyForeignExchangeRatesEntity entity = new DailyForeignExchangeRatesEntity();
 			map.keySet().forEach(key->{
@@ -52,14 +55,14 @@ public class BatchConfig {
 					entity.setExchangeCurrencyType(key.split("/")[1]);
 					entity.setExchangeRate(Double.valueOf(map.get(key)));
 					entity.setID(null);
-					saveIfNotExists(entity);
+					saveIfNotExists(entity, dataList);
 				}
 			});
 		});
 	}
 	
-	private void saveIfNotExists(DailyForeignExchangeRatesEntity entity){
-		if(dailyForeignExchangeRatesRepository.findByDateAndCurrencyTypeAndExchangeCurrencyType(entity.getDate(), entity.getCurrencyType(), entity.getExchangeCurrencyType()).size() == 0)
+	private void saveIfNotExists(DailyForeignExchangeRatesEntity entity, List<DailyForeignExchangeRatesEntity> dataList){
+		if(dataList.indexOf(entity) < 0)
 			dailyForeignExchangeRatesRepository.saveAndFlush(entity);
 	}
 }

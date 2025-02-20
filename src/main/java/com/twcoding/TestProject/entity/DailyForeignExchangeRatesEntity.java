@@ -1,6 +1,7 @@
 package com.twcoding.TestProject.entity;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -69,6 +70,24 @@ public class DailyForeignExchangeRatesEntity implements Serializable {
 
 	public void setExchangeRate(Double exchangeRate) {
 		this.exchangeRate = exchangeRate;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(currencyType, date, exchangeCurrencyType);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DailyForeignExchangeRatesEntity other = (DailyForeignExchangeRatesEntity) obj;
+		return Objects.equals(currencyType, other.currencyType) && Objects.equals(date, other.date)
+				&& Objects.equals(exchangeCurrencyType, other.exchangeCurrencyType);
 	}
 	
 }
