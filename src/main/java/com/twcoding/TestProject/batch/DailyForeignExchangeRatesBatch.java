@@ -55,7 +55,8 @@ public class DailyForeignExchangeRatesBatch {
 					entity.setExchangeCurrencyType(key.split("/")[1]);
 					entity.setExchangeRate(Double.valueOf(map.get(key)));
 					entity.setID(null);
-					saveIfNotExists(entity, dataList);
+					if("NTD".equalsIgnoreCase(entity.getExchangeCurrencyType()))
+						saveIfNotExists(entity, dataList);
 				}
 			});
 		});
